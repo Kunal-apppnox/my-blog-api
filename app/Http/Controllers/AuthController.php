@@ -17,17 +17,20 @@ class AuthController extends Controller
                 'name' => 'required',
                 'email' => 'required|email|unique:users',
                 'password' => 'required|min:6',
+                'role' => 'required|in:users,admin',
             ]);
 
             $user = User::create([
                 'name' => $request->name,
                 'email' => $request->email,
                 'password' => Hash::make($request->password),
+                'role'=> $request->role,
             ]);
 
             return response()->json([
                 'message' => 'User registration successful',
                 'user' => $user
+                
             ], 201);
         } catch (Exception $e) {
             return response()->json([

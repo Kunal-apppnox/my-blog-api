@@ -26,10 +26,6 @@ class CategoryController extends Controller
     public function store(Request $request)
     {
         try {
-            if (Auth::user()->email !== 'admin@example.com') {
-                return response()->json(['message' => 'Unauthorized'], 403);
-            }
-
             $request->validate([
                 'name' => 'required|string|unique:categories'
             ]);
@@ -51,10 +47,6 @@ class CategoryController extends Controller
     public function update(Request $request, $id)
     {
         try {
-            if (Auth::user()->email !== 'admin@example.com') {
-                return response()->json(['message' => 'Unauthorized'], 403);
-            }
-
             $category = Category::findOrFail($id);
 
             $request->validate([
@@ -78,10 +70,6 @@ class CategoryController extends Controller
     public function destroy($id)
     {
         try {
-            if (Auth::user()->email !== 'admin@example.com') {
-                return response()->json(['message' => 'Unauthorized'], 403);
-            }
-
             Category::destroy($id);
 
             return response()->json(['message' => 'Category deleted'], 200);
@@ -97,8 +85,8 @@ class CategoryController extends Controller
     {
         try {
             $request->validate([
-                'category_ids' => 'required|array',
-                'category_ids.*' => 'exists:categories,id'
+                'category_ids' => 'required|array|exists:categories,id',
+                // 'category_ids.*' => 'exists:categories,id'
             ]);
 
             $post = Post::findOrFail($postId);
@@ -116,12 +104,20 @@ class CategoryController extends Controller
     public function getPostsByCategory($categoryId)
     {
         try {
-            $category = Category::with('posts.user')->findOrFail($categoryId);
+            $category = Category::findOrFail($categoryId);
+            $posts = $category->posts()->with('user')->get();
+
+            if ($posts->isEmpty()) {
+                return response()->json([
+                    'message' => 'No posts found for this category'
+                ], 404);
+            }
 
             return response()->json([
-                'category' => $category->name,
-                'posts' => $category->posts
-            ]);
+                'category_id' => $categoryId,
+                'category_name' => $category->name,
+                'posts' => $posts
+            ], 200);
         } catch (Exception $e) {
             return response()->json([
                 'message' => 'Failed to fetch posts for category',
@@ -129,4 +125,5 @@ class CategoryController extends Controller
             ], 500);
         }
     }
+
 }
