@@ -24,13 +24,13 @@ class AuthController extends Controller
                 'name' => $request->name,
                 'email' => $request->email,
                 'password' => Hash::make($request->password),
-                'role'=> $request->role,
+                'role' => $request->role,
             ]);
 
             return response()->json([
                 'message' => 'User registration successful',
                 'user' => $user
-                
+
             ], 201);
         } catch (Exception $e) {
             return response()->json([
@@ -47,14 +47,14 @@ class AuthController extends Controller
                 'email' => 'required|email',
                 'password' => 'required'
             ]);
-            
+
 
             if (!Auth::attempt($request->only('email', 'password'))) {
                 return response()->json(['message' => 'Invalid credentials'], 401);
             }
 
             $user = Auth::user();
-            
+
             $token = $user->createToken('API Token')->accessToken;
 
             return response()->json([

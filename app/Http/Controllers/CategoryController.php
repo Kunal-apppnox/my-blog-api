@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Category;
 use App\Models\Post;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Exception;
 
 class CategoryController extends Controller
@@ -14,6 +14,9 @@ class CategoryController extends Controller
     {
         try {
             $categories = Category::all();
+            $categories = Cache::remember('categories_list', 3600, function () {
+                return Category::all();
+            });
             return response()->json($categories, 200);
         } catch (Exception $e) {
             return response()->json([
@@ -31,6 +34,7 @@ class CategoryController extends Controller
             ]);
 
             $category = Category::create(['name' => $request->name]);
+            Cache::forget('categories_list');
 
             return response()->json([
                 'message' => 'Category created',
@@ -54,6 +58,7 @@ class CategoryController extends Controller
             ]);
 
             $category->update(['name' => $request->name]);
+            Cache::forget('categories_list');
 
             return response()->json([
                 'message' => 'Category updated',
@@ -71,6 +76,7 @@ class CategoryController extends Controller
     {
         try {
             Category::destroy($id);
+            Cache::forget('categories_list');
 
             return response()->json(['message' => 'Category deleted'], 200);
         } catch (Exception $e) {
