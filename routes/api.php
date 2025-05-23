@@ -44,12 +44,12 @@ Route::middleware('auth:api')->group(function () {
 
     // Categories 
     Route::middleware('checkrole:admin')->group(function () {
+        Route::get('/categories', [CategoryController::class, 'index']);
         Route::post('/categories', [CategoryController::class, 'store']);
         Route::put('/categories/{id}', [CategoryController::class, 'update']);
         Route::delete('/categories/{id}', [CategoryController::class, 'destroy']);
     });
 
-    Route::get('/categories', [CategoryController::class, 'index']);
     Route::post('/posts/{postId}/assign-categories', [CategoryController::class, 'assignCategoriesToPost']);
     Route::get('/categories/{categoryId}/posts', [CategoryController::class, 'getPostsByCategory']);
 
